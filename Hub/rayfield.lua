@@ -1,8 +1,15 @@
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
+local LocalPlayer = Players.LocalPlayer
+local GameId = game.GameId
+local PlaceId = game.PlaceId
+local UserId = LocalPlayer.UserId
+local Username = LocalPlayer.Name
+local Supported = (GameId == 6161235818)
+local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
+local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
 local Players = game:GetService("Players")
 
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
-
-local OSHWindow = Rayfield:CreateWindow({
+local Window = Rayfield:CreateWindow({
     Name = "OSHhub",
     LoadingTitle = "Welcome to OSHhub",
     LoadingSubtitle = "Tester Version",
@@ -13,17 +20,6 @@ local OSHWindow = Rayfield:CreateWindow({
 })
 
 local HomeTab = Window:CreateTab("Home", "home")
-
-local LocalPlayer = Players.LocalPlayer
-local GameId = game.GameId
-local PlaceId = game.PlaceId
-local UserId = LocalPlayer.UserId
-local Username = LocalPlayer.Name
-
-local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
-local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
-
-local Supported = (GameId == 6161235818)
 
 local Name = HomeTab:CreateSection("OSHhub | V.1.0.1 | Tester Version")
 local Credits = HomeTab:CreateSection("Thanks for using the script, made by sc0t6. I have worked quite hard on this for it to work :D")
