@@ -38,6 +38,12 @@ local Username = HomeTab:CreateSection("\nUsername: " .. Username ..)
 local ExecutorName = HomeTab:CreateSection("\nExecutor: " .. Executor ..)
 local ExecutorLVL = HomeTab:CreateSection("\nExecutor Level: " .. tostring(ExecLevel) ..)
 local seeifsupportedgame = HomeTab:CreateSection("\nSupported: " .. tostring(Supported))
+local admin = HomeTab:CreateButton({
+        Name = "Infinite Yield",
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+        end
+    })
 
 if GameId == 6161235818 then
     local TwistedTab = Window:CreateTab("Twisted", "party-popper")
