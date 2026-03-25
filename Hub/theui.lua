@@ -69,31 +69,50 @@ if Supported then
         end
     })
 
-    TwistedTab:CreateSection("Tornado Interceptor")
+TwistedTab:CreateSection("Tornado Interceptor")
 
-    -- Logic to find tornadoes
+    -- FIXED LOGIC: More aggressive searching for tornado models
     local function getTornadoList()
         local list = {}
+        -- Loop through workspace; many games put tornadoes in specific folders
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("Model") and (string.find(v.Name:lower(), "tornado") or string.find(v.Name:lower(), "funnel")) then
-                table.insert(list, v.Name)
+            -- Check if it's a model and contains the name, but isn't a player or car
+            if v:IsA("Model") and (v.Name:lower():find("tornado") or v.Name:lower():find("funnel")) then
+                -- Ensure it's not a person or a car part
+                if not Players:GetPlayerFromCharacter(v) then
+                    table.insert(list, v.Name)
+                end
             end
         end
-        if #list == 0 then table.insert(list, "No Tornadoes Found") end
+        
+        if #list == 0 then 
+            return {"No Tornadoes Found"} 
+        end
         return list
     end
 
     local TornadoDropdown = TwistedTab:CreateDropdown({
         Name = "Select Target Tornado",
         Options = getTornadoList(),
-        CurrentOption = "",
+        CurrentOption = {""},
         Flag = "TornadoDropdown", 
         Callback = function(Option)
+            local selectedName = type(Option) == "table" and Option[1] or Option
+            
             for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("Model") and v.Name == Option[1] then
+                if v:IsA("Model") and v.Name == selectedName then
+                    -- If the model doesn't have a PrimaryPart, we force the center part as one
+                    if not v.PrimaryPart then
+                        v.PrimaryPart = v:FindFirstChildWhichIsA("BasePart")
+                    end
+                    
                     selectedTornado = v
-                    if v.PrimaryPart then lastTornadoPos = v.PrimaryPart.Position end
-                    Rayfield:Notify({Title = "Target Acquired", Content = "Tracking: " .. v.Name, Duration = 3})
+                    if v.PrimaryPart then 
+                        lastTornadoPos = v.PrimaryPart.Position 
+                        Rayfield:Notify({Title = "Target Acquired", Content = "Tracking: " .. v.Name, Duration = 3})
+                    else
+                        Rayfield:Notify({Title = "Error", Content = "Tornado has no physical parts to track!", Duration = 3})
+                    end
                     break
                 end
             end
@@ -109,7 +128,7 @@ if Supported then
 
     TwistedTab:CreateSlider({
         Name = "Intercept Distance",
-        Range = {50, 300},
+        Range = {50, 500}, -- Increased range for faster tornadoes
         Increment = 10,
         Suffix = "Studs",
         CurrentValue = 100,
@@ -119,97 +138,44 @@ if Supported then
         end,
     })
 
-    -- TELEPORT TO INTERCEPT (MANUAL DROP)
+    -- TELEPORT TO INTERCEPT
     TwistedTab:CreateButton({
         Name = "Teleport to Intercept Path",
         Callback = function()
-            if selectedTornado and selectedTornado.PrimaryPart then
+            if selectedTornado and (selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")) then
                 local char = LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local root = char.HumanoidRootPart
-                    local tPrim = selectedTornado.PrimaryPart
-                    
-                    -- Velocity Prediction
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                local tPrim = selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")
+
+                if root and tPrim then
+                    -- Prediction Logic
                     local direction = tornadoVelocity.Unit
-                    if direction.X ~= direction.X then direction = Vector3.new(1,0,0) end -- NaN check
+                    -- If tornado is stationary, default to a forward offset
+                    if direction.X ~= direction.X then direction = Vector3.new(1,0,0) end 
                     
                     local interceptPos = tPrim.Position + (direction * interceptDistance)
-                    -- Ensure we are on the ground (approximate)
-                    local rayOrigin = interceptPos + Vector3.new(0, 50, 0)
-                    local rayDirection = Vector3.new(0, -100, 0)
+                    
+                    -- Raycast to find ground so you don't TP into the sky or under the map
+                    local rayOrigin = interceptPos + Vector3.new(0, 100, 0)
+                    local rayDirection = Vector3.new(0, -200, 0)
                     local raycastParams = RaycastParams.new()
                     raycastParams.FilterDescendantsInstances = {char, selectedTornado}
                     raycastParams.FilterType = Enum.RaycastFilterType.Exclude
                     
                     local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-                    local finalY = tPrim.Position.Y 
-                    
-                    if rayResult then
-                        finalY = rayResult.Position.Y + 3 -- 3 studs above ground
-                    else
-                        finalY = tPrim.Position.Y + 5 -- fallback
-                    end
+                    local finalY = rayResult and (rayResult.Position.Y + 3) or (tPrim.Position.Y)
 
                     local finalPos = Vector3.new(interceptPos.X, finalY, interceptPos.Z)
-                    
-                    -- Store this spot so we can return to it later
                     lastProbePos = finalPos 
                     
-                    root.CFrame = CFrame.new(finalPos, tPrim.Position) -- Look at tornado
-                    Rayfield:Notify({Title = "Intercept", Content = "Teleported to path. Drop your probe!", Duration = 3})
+                    root.CFrame = CFrame.new(finalPos, Vector3.new(tPrim.Position.X, finalY, tPrim.Position.Z))
+                    Rayfield:Notify({Title = "Positioned", Content = "Waiting for intercept...", Duration = 3})
                 end
             else
-                Rayfield:Notify({Title = "Error", Content = "Select a tornado first.", Duration = 3})
+                Rayfield:Notify({Title = "Search Error", Content = "No active tornado selected or found.", Duration = 3})
             end
         end,
     })
-
-    -- RETURN TO PROBE
-    TwistedTab:CreateButton({
-        Name = "Return to Last Drop Site",
-        Callback = function()
-            if lastProbePos then
-                local char = LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    char.HumanoidRootPart.CFrame = CFrame.new(lastProbePos)
-                    Rayfield:Notify({Title = "Returned", Content = "Teleported to last drop site.", Duration = 3})
-                end
-            else
-                Rayfield:Notify({Title = "Error", Content = "No previous drop site recorded.", Duration = 3})
-            end
-        end,
-    })
-
-    -- SUICIDE INTERCEPT (INSIDE TORNADO)
-    TwistedTab:CreateButton({
-        Name = "Teleport INSIDE Tornado (High Altitude)",
-        Callback = function()
-            if selectedTornado and selectedTornado.PrimaryPart then
-                local char = LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local tPos = selectedTornado.PrimaryPart.Position
-                    -- Teleport 300 studs above the center
-                    local highPos = Vector3.new(tPos.X, tPos.Y + 300, tPos.Z)
-                    
-                    char.HumanoidRootPart.CFrame = CFrame.new(highPos)
-                    Rayfield:Notify({Title = "YOLO", Content = "Teleported inside funnel.", Duration = 3})
-                end
-            else
-                Rayfield:Notify({Title = "Error", Content = "Select a tornado first.", Duration = 3})
-            end
-        end,
-    })
-
-    -- Background Velocity Calculator
-    RunService.Heartbeat:Connect(function(deltaTime)
-        if selectedTornado and selectedTornado.PrimaryPart then
-            local currentPos = selectedTornado.PrimaryPart.Position
-            local displacement = currentPos - lastTornadoPos
-            tornadoVelocity = displacement / deltaTime
-            lastTornadoPos = currentPos
-        end
-    end)
-end
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
