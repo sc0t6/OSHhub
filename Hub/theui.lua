@@ -177,6 +177,18 @@ TwistedTab:CreateSection("Tornado Interceptor")
         end,
     })
 
+-- Background Velocity Calculator
+    RunService.Heartbeat:Connect(function(deltaTime)
+        if selectedTornado and (selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")) then
+            local tPrim = selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")
+            local currentPos = tPrim.Position
+            local displacement = currentPos - lastTornadoPos
+            tornadoVelocity = displacement / deltaTime
+            lastTornadoPos = currentPos
+        end
+    end)
+end    
+
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
     Content = "Feel free to share the script but only keep it off websites.",
