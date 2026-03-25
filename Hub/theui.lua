@@ -5,7 +5,7 @@ local GameId = game.GameId
 local PlaceId = game.PlaceId
 local UserId = LocalPlayer.UserId
 local Username = LocalPlayer.Name
-local Supported = (GameId == 6161235818)
+local Supported = (GameId == 6161235818, 2251388500)
 local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
 local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
 
@@ -42,7 +42,7 @@ local admin = HomeTab:CreateButton({
         end
     })
 
-if GameId == 6161235818 then
+if GameId == 6161235818 and 2251388500 then
     local TwistedTab = Window:CreateTab("Twisted", "party-popper")
 
     local TwistedB = TwistedTab:CreateButton({
