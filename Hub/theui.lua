@@ -1,5 +1,6 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local GameId = game.GameId
 local PlaceId = game.PlaceId
 local UserId = LocalPlayer.UserId
@@ -7,7 +8,6 @@ local Username = LocalPlayer.Name
 local Supported = (GameId == 6161235818)
 local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
 local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
-local Players = game:GetService("Players")
 
 local Window = Rayfield:CreateWindow({
     Name = "OSHhub",
