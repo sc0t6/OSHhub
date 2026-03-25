@@ -1,8 +1,8 @@
 local Players = game:GetService("Players")
 
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
 
-local Window = Rayfield:CreateWindow({
+local OSHWindow = Rayfield:CreateWindow({
     Name = "OSHhub",
     LoadingTitle = "Welcome to OSHhub",
     LoadingSubtitle = "Tester Version",
@@ -10,10 +10,6 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {
         Enabled = false
     },
-    Discord = {
-        Enabled = false
-    },
-    KeySystem = false
 })
 
 local HomeTab = Window:CreateTab("Home", "home")
