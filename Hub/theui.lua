@@ -20,7 +20,7 @@ local HomeTab = Window:CreateTab("Home", "home")
 
 local Name = HomeTab:CreateSection("OSHHub | V.1.0.1 | Tester Version")
 
-local Credits = HomeTab:CreateSection("Thanks for using the script, made by sc0t6. I have worked quite hard on this for it to work :D")
+local Credits = HomeTab:CreateSection("Thanks for using the script, made by sc0t6.")
 
 local GameID = HomeTab:CreateSection("GameID: " .. GameId)
 local PlaceID = HomeTab:CreateSection("PlaceID: " .. PlaceId)
