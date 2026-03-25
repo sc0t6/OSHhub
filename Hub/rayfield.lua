@@ -20,8 +20,8 @@ local PlaceId = game.PlaceId
 local UserId = LocalPlayer.UserId
 local Username = LocalPlayer.Name
 
-local Executor = identifyexecutor and identifyexecutor() or "Unknown Executor"
-local ExecLevel = getexecutorlevel and getexecutorlevel() or "Unknown"
+local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
+local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
 
 local Supported = (GameId == 6161235818)
 
