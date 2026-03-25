@@ -1,4 +1,4 @@
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local LocalPlayer = Players.LocalPlayer
 local GameId = game.GameId
 local PlaceId = game.PlaceId
@@ -72,3 +72,5 @@ Rayfield:Notify({
     Content = "Feel free to share the script but only keep it off websites.",
     Duration = 3
   })
+
+Rayfield:LoadConfiguration()
