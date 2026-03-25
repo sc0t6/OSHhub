@@ -18,15 +18,23 @@ local Window = Rayfield:CreateWindow({
 
 local HomeTab = Window:CreateTab("Home", "home")
 
-local Name = HomeTab:CreateSection("OSHhub | V.1.0.1 | Tester Version")
+local Name = HomeTab:CreateSection("OSHHub | V.1.0.1 | Tester Version")
+
 local Credits = HomeTab:CreateSection("Thanks for using the script, made by sc0t6. I have worked quite hard on this for it to work :D")
-local GameID = HomeTab:CreateSection("GameId: " .. GameId ..)
-local PlaceID = HomeTab:CreateSection("\nPlaceId: " .. PlaceId ..)
+
+local GameID = HomeTab:CreateSection("GameID: " .. GameId)
+local PlaceID = HomeTab:CreateSection("\nPlaceID: " .. PlaceId)
+
 local UserID = HomeTab:CreateSection("\nUserId: " .. UserId ..)
+
 local Username = HomeTab:CreateSection("\nUsername: " .. Username ..)
+
 local ExecutorName = HomeTab:CreateSection("\nExecutor: " .. Executor ..)
+
 local ExecutorLVL = HomeTab:CreateSection("\nExecutor Level: " .. tostring(ExecLevel) ..)
+
 local seeifsupportedgame = HomeTab:CreateSection("\nSupported: " .. tostring(Supported))
+
 local admin = HomeTab:CreateButton({
         Name = "Infinite Yield",
         Callback = function()
