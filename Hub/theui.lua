@@ -23,17 +23,17 @@ local Name = HomeTab:CreateSection("OSHHub | V.1.0.1 | Tester Version")
 local Credits = HomeTab:CreateSection("Thanks for using the script, made by sc0t6. I have worked quite hard on this for it to work :D")
 
 local GameID = HomeTab:CreateSection("GameID: " .. GameId)
-local PlaceID = HomeTab:CreateSection("\nPlaceID: " .. PlaceId)
+local PlaceID = HomeTab:CreateSection("PlaceID: " .. PlaceId)
 
-local UserID = HomeTab:CreateSection("\nUserId: " .. UserId )
+local UserID = HomeTab:CreateSection("UserId: " .. UserId )
 
-local Username = HomeTab:CreateSection("\nUsername: " .. Username )
+local Username = HomeTab:CreateSection("Username: " .. Username )
 
-local ExecutorName = HomeTab:CreateSection("\nExecutor: " .. Executor )
+local ExecutorName = HomeTab:CreateSection("Executor: " .. Executor )
 
-local ExecutorLVL = HomeTab:CreateSection("\nExecutor Level: " .. tostring(ExecLevel) )
+local ExecutorLVL = HomeTab:CreateSection("Executor Level: " .. tostring(ExecLevel) )
 
-local seeifsupportedgame = HomeTab:CreateSection("\nSupported: " .. tostring(Supported))
+local seeifsupportedgame = HomeTab:CreateSection("Supported: " .. tostring(Supported))
 
 local admin = HomeTab:CreateButton({
         Name = "Infinite Yield",
