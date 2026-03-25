@@ -14,9 +14,6 @@ local Window = Rayfield:CreateWindow({
     LoadingTitle = "Welcome to OSHhub",
     LoadingSubtitle = "Tester Version",
     Theme = "Ocean",
-    ConfigurationSaving = {
-        Enabled = false
-    },
 })
 
 local HomeTab = Window:CreateTab("Home", "home")
