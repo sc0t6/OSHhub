@@ -5,7 +5,7 @@ local GameId = game.GameId
 local PlaceId = game.PlaceId
 local UserId = LocalPlayer.UserId
 local Username = LocalPlayer.Name
-local Supported = (GameId == 6161235818, 2251388500)
+local Supported = (GameId == 6161235818 or GameId == 2251388500)
 local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
 local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
 
@@ -25,13 +25,13 @@ local Credits = HomeTab:CreateSection("Thanks for using the script, made by sc0t
 local GameID = HomeTab:CreateSection("GameID: " .. GameId)
 local PlaceID = HomeTab:CreateSection("PlaceID: " .. PlaceId)
 
-local UserID = HomeTab:CreateSection("UserId: " .. UserId )
+local UserID = HomeTab:CreateSection("UserId: " .. UserId)
 
-local Username = HomeTab:CreateSection("Username: " .. Username )
+local Username = HomeTab:CreateSection("Username: " .. Username)
 
-local ExecutorName = HomeTab:CreateSection("Executor: " .. Executor )
+local ExecutorName = HomeTab:CreateSection("Executor: " .. Executor)
 
-local ExecutorLVL = HomeTab:CreateSection("Executor Level: " .. tostring(ExecLevel) )
+local ExecutorLVL = HomeTab:CreateSection("Executor Level: " .. tostring(ExecLevel))
 
 local seeifsupportedgame = HomeTab:CreateSection("Supported: " .. tostring(Supported))
 
@@ -42,7 +42,7 @@ local admin = HomeTab:CreateButton({
         end
     })
 
-if GameId == 6161235818 and 2251388500 then
+if GameId == 6161235818 or GameId == 2251388500 then
     local TwistedTab = Window:CreateTab("Twisted", "party-popper")
 
     local TwistedB = TwistedTab:CreateButton({
