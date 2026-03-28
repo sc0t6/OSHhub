@@ -226,44 +226,38 @@ if game.PlaceId == 189707 then
             end
         end
     })
-   local DisasterSection = NDSTab:CreateSection("Live Weather Detection")
-    local DisasterLabel = NDSTab:CreateLabel("Current: Waiting...", 4483362458)
+local DisasterSection = MainTab:CreateSection("Current Status")
 
-    local function UpdateDisaster(val)
-        if val and val ~= "" then
-            DisasterLabel:Set("Current Disaster: " .. tostring(val))
-            Rayfield:Notify({
-                Title = "Weather Alert",
-                Content = tostring(val) .. " has started!",
-                Duration = 4
-            })
-        else
-            DisasterLabel:Set("Status: Intermission")
-        end
-    end
+local DisasterLabel = MainTab:CreateLabel("Current Disaster: None")
 
-    task.spawn(function()
-        local gameFolder = workspace:WaitForChild("Game", 5)
-        local disasterVal = gameFolder and gameFolder:FindFirstChild("Disaster") or workspace:FindFirstChild("Disaster")
+task.spawn(function()
+    while task.wait(1) do
+        local disasterName = "None"
         
-        if disasterVal and disasterVal:IsA("StringValue") then
-            UpdateDisaster(disasterVal.Value)
-            
-            disasterVal.Changed:Connect(UpdateDisaster)
-        else
-            while task.wait(2) do
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("StringValue") and (v.Name == "Disaster" or v.Name == "CurrentDisaster") then
-                        if v.Value ~= "" and _G.LastNDS ~= v.Value then
-                            UpdateDisaster(v.Value)
-                            _G.LastNDS = v.Value
-                        end
-                        break
+        local playerUI = game.Players.LocalPlayer.PlayerGui:FindFirstChild("UI")
+        if playerUI then
+            for _, child in pairs(playerUI:GetChildren()) do
+                if child.Name == "Disaster Warning" or child:FindFirstChild("warningText") then
+                    local textLabel = child:FindFirstChild("warningText", true)
+                    if textLabel and textLabel.Text ~= "" then
+                        disasterName = textLabel.Text
                     end
                 end
             end
         end
-    end)
+
+        if disasterName == "None" then
+            local mainGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("MainGui")
+            local dLabel = mainGui and mainGui:FindFirstChild("DisasterFrame") and mainGui.DisasterFrame:FindFirstChild("DisasterLabel")
+            if dLabel and dLabel.Visible and dLabel.Text ~= "" then
+                disasterName = dLabel.Text
+            end
+        end
+
+        -- Update the Rayfield Label
+        DisasterLabel:Set("Current Disaster: " .. disasterName)
+    end
+end)
 end
 
 Rayfield:Notify({
