@@ -242,20 +242,15 @@ if game.PlaceId == 189707 then
         end
     end
 
-    -- Real-time Watcher (No Loop needed)
     task.spawn(function()
-        -- Path 1: Game Folder (Most Common)
         local gameFolder = workspace:WaitForChild("Game", 5)
         local disasterVal = gameFolder and gameFolder:FindFirstChild("Disaster") or workspace:FindFirstChild("Disaster")
         
         if disasterVal and disasterVal:IsA("StringValue") then
-            -- Trigger immediately for current state
             UpdateDisaster(disasterVal.Value)
             
-            -- Hook for future changes
             disasterVal.Changed:Connect(UpdateDisaster)
         else
-            -- Path 2: Fallback to searching all StringValues if game obfuscated
             while task.wait(2) do
                 for _, v in pairs(workspace:GetDescendants()) do
                     if v:IsA("StringValue") and (v.Name == "Disaster" or v.Name == "CurrentDisaster") then
@@ -269,6 +264,7 @@ if game.PlaceId == 189707 then
             end
         end
     end)
+end
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
