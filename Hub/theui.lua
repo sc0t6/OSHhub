@@ -235,15 +235,16 @@ if game.PlaceId == 189707 then
             Rayfield:Notify({Title = "Teleported", Content = "Moved to safe platform", Duration = 2})
         end
     })
-        NDSTab:CreateButton({
+    NDSTab:CreateButton({
         Name = "Teleport to -280, 179, 339",
         Callback = function()
-            if LocalPlayer.Character then
-                LocalPlayer.Character:PivotTo(CFrame.new(-280, 179, 339))
+            local char = LocalPlayer.Character
+            if char then
+                char:PivotTo(CFrame.new(-280, 179, 339))
             end
         end
     })
-end        
+end     
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
