@@ -2,6 +2,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local GameId = game.GameId
@@ -231,6 +233,14 @@ if game.PlaceId == 189707 then
             local NDSpos = customPos or findSafePlatform()
             tpTo(NDSpos)
             Rayfield:Notify({Title = "Teleported", Content = "Moved to safe platform", Duration = 2})
+        end
+    })
+        NDSTab:CreateButton({
+        Name = "Teleport to -280, 179, 339",
+        Callback = function()
+            if LocalPlayer.Character then
+                LocalPlayer.Character:PivotTo(CFrame.new(-280, 179, 339))
+            end
         end
     })
 end        
