@@ -15,12 +15,11 @@ local NDSSupport = (GameId == 189707)
 local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
 local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
 
--- State variables
 local selectedTornado = nil
-local interceptDistance = 100 -- Default changed to 100
+local interceptDistance = 100 
 local tornadoVelocity = Vector3.new(0,0,0)
 local lastTornadoPos = Vector3.new(0,0,0)
-local lastProbePos = nil -- Stores where we last teleported to intercept
+local lastProbePos = nil 
 
 local Window = Rayfield:CreateWindow({
     Name = "OSHhub",
@@ -30,7 +29,7 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {Enabled = true, FolderName = "OSHhub", FileName = "Config"},
 })
 
--- [[ HOME TAB ]] --
+-- home tab
 local HomeTab = Window:CreateTab("Home", "home")
 HomeTab:CreateSection("OSHHub | V.1.0.2 | Tester Version")
 HomeTab:CreateSection("Thanks for using the script, made by sc0t6.")
@@ -60,7 +59,7 @@ HomeTab:CreateButton({
     end
 })
 
--- [[ TWISTED TAB ]] --
+-- twisted tab
 if Supported then
     local TwistedTab = Window:CreateTab("Twisted", "party-popper")
 
@@ -74,14 +73,10 @@ if Supported then
 
 TwistedTab:CreateSection("Tornado Interceptor")
 
-    -- FIXED LOGIC: More aggressive searching for tornado models
     local function getTornadoList()
         local list = {}
-        -- Loop through workspace; many games put tornadoes in specific folders
         for _, v in pairs(Workspace:GetDescendants()) do
-            -- Check if it's a model and contains the name, but isn't a player or car
             if v:IsA("Model") and (v.Name:lower():find("tornado") or v.Name:lower():find("funnel")) then
-                -- Ensure it's not a person or a car part
                 if not Players:GetPlayerFromCharacter(v) then
                     table.insert(list, v.Name)
                 end
@@ -104,7 +99,6 @@ TwistedTab:CreateSection("Tornado Interceptor")
             
             for _, v in pairs(Workspace:GetDescendants()) do
                 if v:IsA("Model") and v.Name == selectedName then
-                    -- If the model doesn't have a PrimaryPart, we force the center part as one
                     if not v.PrimaryPart then
                         v.PrimaryPart = v:FindFirstChildWhichIsA("BasePart")
                     end
@@ -131,7 +125,7 @@ TwistedTab:CreateSection("Tornado Interceptor")
 
     TwistedTab:CreateSlider({
         Name = "Intercept Distance",
-        Range = {50, 500}, -- Increased range for faster tornadoes
+        Range = {50, 500},
         Increment = 10,
         Suffix = "Studs",
         CurrentValue = 100,
@@ -151,14 +145,11 @@ TwistedTab:CreateSection("Tornado Interceptor")
                 local tPrim = selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")
 
                 if root and tPrim then
-                    -- Prediction Logic
                     local direction = tornadoVelocity.Unit
-                    -- If tornado is stationary, default to a forward offset
                     if direction.X ~= direction.X then direction = Vector3.new(1,0,0) end 
                     
                     local interceptPos = tPrim.Position + (direction * interceptDistance)
                     
-                    -- Raycast to find ground so you don't TP into the sky or under the map
                     local rayOrigin = interceptPos + Vector3.new(0, 100, 0)
                     local rayDirection = Vector3.new(0, -200, 0)
                     local raycastParams = RaycastParams.new()
@@ -180,7 +171,6 @@ TwistedTab:CreateSection("Tornado Interceptor")
         end,
     })
 
--- Background Velocity Calculator
     RunService.Heartbeat:Connect(function(deltaTime)
         if selectedTornado and (selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")) then
             local tPrim = selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")
@@ -236,30 +226,49 @@ if game.PlaceId == 189707 then
             end
         end
     })
-    local DisasterSection = NDSTab:CreateSection("Live Disaster Tracker")
-    
-    local DisasterLabel = NDSTab:CreateLabel("Current Disaster: Waiting...", 4483362458)
+    local DisasterSection = NDSTab:CreateSection("Dynamic Weather Detection")
+    local DisasterLabel = NDSTab:CreateLabel("Current: Waiting for round...", 4483362458)
 
     task.spawn(function()
         while task.wait(1) do
-            local status = workspace:FindFirstChild("Status")
-            if status and status:IsA("StringValue") then
-                local currentDisaster = status.Value
-                
-                if currentDisaster ~= "" and currentDisaster ~= "Waiting..." then
-                    DisasterLabel:Set("Current Disaster: " .. currentDisaster)
-                    
-                    if _G.LastDisaster ~= currentDisaster then
-                        Rayfield:Notify({
-                            Title = "NDS Alert",
-                            Content = "New Disaster Detected: " .. currentDisaster,
-                            Duration = 5
-                        })
-                        _G.LastDisaster = currentDisaster
-                    end
-                else
-                    DisasterLabel:Set("Status: Intermission / Waiting")
+            local foundName = ""
+
+            local gameFolder = workspace:FindFirstChild("Game")
+            if gameFolder and gameFolder:FindFirstChild("Functions") then
+                local disasterValue = gameFolder.Functions:FindFirstChild("Disaster")
+                if disasterValue and disasterValue:IsA("StringValue") then
+                    foundName = disasterValue.Value
                 end
+            end
+
+            if foundName == "" then
+                local status = workspace:FindFirstChild("Status")
+                if status and status:IsA("StringValue") then
+                    foundName = status.Value
+                end
+            end
+
+            if foundName == "" then
+                local mainGui = LocalPlayer.PlayerGui:FindFirstChild("MainGui")
+                local disasterFrame = mainGui and mainGui:FindFirstChild("DisasterFrame")
+                if disasterFrame and disasterFrame:FindFirstChild("DisasterName") then
+                    foundName = disasterFrame.DisasterName.Text
+                end
+            end
+
+            if foundName ~= "" and foundName ~= "Waiting..." then
+                DisasterLabel:Set("Current Disaster: " .. foundName)
+                
+                if _G.CurrentNDSWeather ~= foundName then
+                    Rayfield:Notify({
+                        Title = "New Disaster!",
+                        Content = "Detected: " .. foundName,
+                        Duration = 5
+                    })
+                    _G.CurrentNDSWeather = foundName
+                end
+            else
+                DisasterLabel:Set("Status: Intermission / Searching...")
             end
         end
     end)
