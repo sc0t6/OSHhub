@@ -218,7 +218,7 @@ if game.PlaceId == 189707 then
     NDSTab:CreateSection("Removing fall damage is serversided so we didnt add it")
     NDSTab:CreateSection("Safety")   
         NDSTab:CreateButton({
-        Name = "Teleport to -280, 179, 339",
+        Name = "Teleport to Safe Zone (spawnpoint)",
         Callback = function()
             local char = LocalPlayer.Character
             if char then
@@ -226,52 +226,28 @@ if game.PlaceId == 189707 then
             end
         end
     })
-    local DisasterSection = NDSTab:CreateSection("Dynamic Weather Detection")
-    local DisasterLabel = NDSTab:CreateLabel("Current: Waiting for round...", 4483362458)
+    local DisasterSection = NDSTab:CreateSection("Event-Based Detection")
+    local DisasterLabel = NDSTab:CreateLabel("Current: Waiting for event...", 4483362458)
 
-    task.spawn(function()
-        while task.wait(1) do
-            local foundName = ""
+    -- Detect via ReplicatedStorage Event
+    local announceEvent = game:GetService("ReplicatedStorage"):WaitForChild("PrintAnnounceEvent", 5)
 
-            local gameFolder = workspace:FindFirstChild("Game")
-            if gameFolder and gameFolder:FindFirstChild("Functions") then
-                local disasterValue = gameFolder.Functions:FindFirstChild("Disaster")
-                if disasterValue and disasterValue:IsA("StringValue") then
-                    foundName = disasterValue.Value
-                end
-            end
-
-            if foundName == "" then
-                local status = workspace:FindFirstChild("Status")
-                if status and status:IsA("StringValue") then
-                    foundName = status.Value
-                end
-            end
-
-            if foundName == "" then
-                local mainGui = LocalPlayer.PlayerGui:FindFirstChild("MainGui")
-                local disasterFrame = mainGui and mainGui:FindFirstChild("DisasterFrame")
-                if disasterFrame and disasterFrame:FindFirstChild("DisasterName") then
-                    foundName = disasterFrame.DisasterName.Text
-                end
-            end
-
-            if foundName ~= "" and foundName ~= "Waiting..." then
-                DisasterLabel:Set("Current Disaster: " .. foundName)
+    if announceEvent then
+        announceEvent.OnClientEvent:Connect(function(type, message)
+            -- NDS often sends the disaster name as the second argument
+            if type == "print" and message then
+                DisasterLabel:Set("Current Disaster: " .. tostring(message))
                 
-                if _G.CurrentNDSWeather ~= foundName then
-                    Rayfield:Notify({
-                        Title = "New Disaster!",
-                        Content = "Detected: " .. foundName,
-                        Duration = 5
-                    })
-                    _G.CurrentNDSWeather = foundName
-                end
-            else
-                DisasterLabel:Set("Status: Intermission / Searching...")
+                Rayfield:Notify({
+                    Title = "Event Detected",
+                    Content = "Disaster: " .. tostring(message),
+                    Duration = 5
+                })
             end
-        end
-    end)
+        end)
+    else
+        DisasterLabel:Set("Error: PrintAnnounceEvent not found")
+    end
 end
 
 Rayfield:Notify({
