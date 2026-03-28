@@ -223,7 +223,7 @@ end
 if game.PlaceId == 189707 then
     local NDSTab = Window:CreateTab("NDS", 75756933857153)
 
-    NDSTab:CreateSection("Removing fall damage is serversided so we didnt add it@)
+    NDSTab:CreateSection("Removing fall damage is serversided so we didnt add it")
     NDSTab:CreateSection("Safety")   
     NDSTab:CreateButton({
         Name = "TP to safe area (spawnpoint)",
@@ -233,7 +233,7 @@ if game.PlaceId == 189707 then
             Rayfield:Notify({Title = "Teleported", Content = "Moved to safe platform", Duration = 2})
         end
     })
-    end        
+end        
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
