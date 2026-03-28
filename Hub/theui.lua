@@ -9,6 +9,7 @@ local PlaceId = game.PlaceId
 local UserId = LocalPlayer.UserId
 local Username = LocalPlayer.Name
 local Supported = (GameId == 6161235818 or GameId == 2251388500)
+local NDSSupport = (GameId == 189707)
 local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
 local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
 
@@ -49,8 +50,8 @@ HomeTab:CreateButton({
 HomeTab:CreateButton({
     Name = "Check Game Detection",
     Callback = function()
-        if Supported then
-            Rayfield:Notify({Title = "Supported Game", Content = "Twisted detected and loaded", Duration = 4})
+        if Supported or NDSSupport then
+            Rayfield:Notify({Title = "Supported Game", Content = "DetectedGame", Duration = 4})
         else
             Rayfield:Notify({Title = "Unsupported", Content = "No script available for this game", Duration = 4})
         end
@@ -188,6 +189,51 @@ TwistedTab:CreateSection("Tornado Interceptor")
         end
     end)
 end    
+
+local customPos = nil
+
+local function findSafePlatform()
+    local best = nil
+    local bestY = 0
+    for _, part in pairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") 
+        and not part.Parent:FindFirstChildOfClass("Humanoid")
+        and part.Anchored
+        and part.Size.X >= 8
+        and part.Size.Z >= 8
+        and part.Position.Y > bestY 
+        and part.Position.Y < 500 then
+            best = part
+            bestY = part.Position.Y
+        end
+    end
+    if best then
+        return best.Position + Vector3.new(0, 4, 0)
+    end
+    return Vector3.new(0, safeHeight, 0)
+end
+
+local function tpTo(NDSpos)
+    local hrp = getHRP()
+    if hrp then
+        hrp.CFrame = CFrame.new(NDSpos)
+    end
+end
+
+if game.PlaceId == 189707 then
+    local NDSTab = Window:CreateTab("NDS", 75756933857153)
+
+    NDSTab:CreateSection("Removing fall damage is serversided so we didnt add it@)
+    NDSTab:CreateSection("Safety")   
+    NDSTab:CreateButton({
+        Name = "TP to safe area (spawnpoint)",
+        Callback = function()
+            local NDSpos = customPos or findSafePlatform()
+            tpTo(NDSpos)
+            Rayfield:Notify({Title = "Teleported", Content = "Moved to safe platform", Duration = 2})
+        end
+    })
+    end        
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
