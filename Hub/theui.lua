@@ -226,29 +226,49 @@ if game.PlaceId == 189707 then
             end
         end
     })
-    local DisasterSection = NDSTab:CreateSection("Event-Based Detection")
-    local DisasterLabel = NDSTab:CreateLabel("Current: Waiting for event...", 4483362458)
+   local DisasterSection = NDSTab:CreateSection("Live Weather Detection")
+    local DisasterLabel = NDSTab:CreateLabel("Current: Waiting...", 4483362458)
 
-    -- Detect via ReplicatedStorage Event
-    local announceEvent = game:GetService("ReplicatedStorage"):WaitForChild("PrintAnnounceEvent", 5)
-
-    if announceEvent then
-        announceEvent.OnClientEvent:Connect(function(type, message)
-            -- NDS often sends the disaster name as the second argument
-            if type == "print" and message then
-                DisasterLabel:Set("Current Disaster: " .. tostring(message))
-                
-                Rayfield:Notify({
-                    Title = "Event Detected",
-                    Content = "Disaster: " .. tostring(message),
-                    Duration = 5
-                })
-            end
-        end)
-    else
-        DisasterLabel:Set("Error: PrintAnnounceEvent not found")
+    local function UpdateDisaster(val)
+        if val and val ~= "" then
+            DisasterLabel:Set("Current Disaster: " .. tostring(val))
+            Rayfield:Notify({
+                Title = "Weather Alert",
+                Content = tostring(val) .. " has started!",
+                Duration = 4
+            })
+        else
+            DisasterLabel:Set("Status: Intermission")
+        end
     end
-end
+
+    -- Real-time Watcher (No Loop needed)
+    task.spawn(function()
+        -- Path 1: Game Folder (Most Common)
+        local gameFolder = workspace:WaitForChild("Game", 5)
+        local disasterVal = gameFolder and gameFolder:FindFirstChild("Disaster") or workspace:FindFirstChild("Disaster")
+        
+        if disasterVal and disasterVal:IsA("StringValue") then
+            -- Trigger immediately for current state
+            UpdateDisaster(disasterVal.Value)
+            
+            -- Hook for future changes
+            disasterVal.Changed:Connect(UpdateDisaster)
+        else
+            -- Path 2: Fallback to searching all StringValues if game obfuscated
+            while task.wait(2) do
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if v:IsA("StringValue") and (v.Name == "Disaster" or v.Name == "CurrentDisaster") then
+                        if v.Value ~= "" and _G.LastNDS ~= v.Value then
+                            UpdateDisaster(v.Value)
+                            _G.LastNDS = v.Value
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end)
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
