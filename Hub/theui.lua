@@ -227,14 +227,33 @@ if game.PlaceId == 189707 then
 
     NDSTab:CreateSection("Removing fall damage is serversided so we didnt add it")
     NDSTab:CreateSection("Safety")   
-    NDSTab:CreateButton({
-        Name = "TP to safe area (spawnpoint)",
-        Callback = function()
-            local NDSpos = customPos or findSafePlatform()
-            tpTo(NDSpos)
-            Rayfield:Notify({Title = "Teleported", Content = "Moved to safe platform", Duration = 2})
+    local DisasterSection = NDSTab:CreateSection("Live Disaster Tracker")
+    
+    local DisasterLabel = NDSTab:CreateLabel("Current Disaster: Waiting...", 4483362458)
+
+    task.spawn(function()
+        while task.wait(1) do
+            local status = workspace:FindFirstChild("Status")
+            if status and status:IsA("StringValue") then
+                local currentDisaster = status.Value
+                
+                if currentDisaster ~= "" and currentDisaster ~= "Waiting..." then
+                    DisasterLabel:Set("Current Disaster: " .. currentDisaster)
+                    
+                    if _G.LastDisaster ~= currentDisaster then
+                        Rayfield:Notify({
+                            Title = "NDS Alert",
+                            Content = "New Disaster Detected: " .. currentDisaster,
+                            Duration = 5
+                        })
+                        _G.LastDisaster = currentDisaster
+                    end
+                else
+                    DisasterLabel:Set("Status: Intermission / Waiting")
+                end
+            end
         end
-    })
+    end)
     NDSTab:CreateButton({
         Name = "Teleport to -280, 179, 339",
         Callback = function()
