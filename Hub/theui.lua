@@ -226,9 +226,9 @@ if game.PlaceId == 189707 then
             end
         end
     })
-local DisasterSection = MainTab:CreateSection("Current Status")
+local DisasterSection = NDSTab:CreateSection("Current Status")
 
-local DisasterLabel = MainTab:CreateLabel("Current Disaster: None")
+local DisasterLabel = NDSTab:CreateLabel("Current Disaster: None")
 
 task.spawn(function()
     while task.wait(1) do
