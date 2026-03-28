@@ -227,6 +227,15 @@ if game.PlaceId == 189707 then
 
     NDSTab:CreateSection("Removing fall damage is serversided so we didnt add it")
     NDSTab:CreateSection("Safety")   
+        NDSTab:CreateButton({
+        Name = "Teleport to -280, 179, 339",
+        Callback = function()
+            local char = LocalPlayer.Character
+            if char then
+                char:PivotTo(CFrame.new(-280, 179, 339))
+            end
+        end
+    })
     local DisasterSection = NDSTab:CreateSection("Live Disaster Tracker")
     
     local DisasterLabel = NDSTab:CreateLabel("Current Disaster: Waiting...", 4483362458)
@@ -254,16 +263,7 @@ if game.PlaceId == 189707 then
             end
         end
     end)
-    NDSTab:CreateButton({
-        Name = "Teleport to -280, 179, 339",
-        Callback = function()
-            local char = LocalPlayer.Character
-            if char then
-                char:PivotTo(CFrame.new(-280, 179, 339))
-            end
-        end
-    })
-end     
+end
 
 Rayfield:Notify({
     Title = "Welcome to OSHhub | Tester Version!",
