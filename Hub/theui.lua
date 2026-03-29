@@ -64,8 +64,9 @@ if Supported then
     local TwistedTab = Window:CreateTab("Twisted", "party-popper")
 
     TwistedTab:CreateSection("Bypasses")
+    TwistedTab:CreateSection("When you die, press the button again so the anticheat doesnt occur")
     TwistedTab:CreateButton({
-        Name = "TwistedB (Bypass)",
+        Name = "TwistedB (Bypass, but expires when died)",
         Callback = function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/sc0t6/OSHhub/refs/heads/main/scripts/bypasstwisted.lua"))()
         end
