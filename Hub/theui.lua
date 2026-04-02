@@ -162,7 +162,9 @@ TwistedTab:CreateToggle({
         updateESPVisibility()
     end,
 })
+    
 end
+
 local customPos = nil
 
 local function findSafePlatform()
