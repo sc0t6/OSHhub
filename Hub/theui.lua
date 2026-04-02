@@ -4,6 +4,7 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
+local myUserId = tostring(LocalPlayer.UserId)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local GameId = game.GameId
@@ -24,6 +25,70 @@ local Window = Rayfield:CreateWindow({
 
 -- home tab
 local HomeTab = Window:CreateTab("Home", "home")
+
+local probesFolder = workspace:WaitForChild("player_related"):WaitForChild("probes")
+local universalESP_Enabled = false
+local personalESP_Enabled = false
+local espObjects = {}
+
+local function createESP(probe)
+    if not probe:IsA("Model") and not probe:IsA("BasePart") then return end
+    if espObjects[probe] then return end
+
+    local isMine = (probe.Name == myUserId)
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ProbeESP_" .. probe.Name
+    
+    if isMine then
+        highlight.FillColor = Color3.fromRGB(0, 255, 0)
+    else
+        highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    end
+    
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = probe
+    highlight.Parent = game:GetService("CoreGui")
+    
+    if isMine then
+        highlight.Enabled = personalESP_Enabled or universalESP_Enabled
+    else
+        highlight.Enabled = universalESP_Enabled
+    end
+
+    espObjects[probe] = { highlight = highlight, isMine = isMine }
+
+    probe.AncestryChanged:Connect(function(_, parent)
+        if not parent then
+            if espObjects[probe] then
+                espObjects[probe].highlight:Destroy()
+                espObjects[probe] = nil
+            end
+        end
+    end)
+end
+
+local function updateESPVisibility()
+    for probe, data in pairs(espObjects) do
+        if data.isMine then
+            data.highlight.Enabled = personalESP_Enabled or universalESP_Enabled
+        else
+            data.highlight.Enabled = universalESP_Enabled
+        end
+    end
+end
+
+for _, probe in ipairs(probesFolder:GetChildren()) do
+    createESP(probe)
+end
+
+probesFolder.ChildAdded:Connect(function(probe)
+    task.wait(0.1)
+    createESP(probe)
+end)
+
 HomeTab:CreateSection("OSHHub | V.1.0.2 | Tester Version")
 HomeTab:CreateSection("Thanks for using the script, made by sc0t6.")
 HomeTab:CreateSection("GameID: " .. GameId)
@@ -78,87 +143,26 @@ if Supported then
         end
     })
 
-local ESP_ENABLED = false
-local espObjects = {}
-
--- Function to create ESP for a probe
-local function createESP(probe)
-    if not probe:IsA("Model") and not probe:IsA("BasePart") then return end
-    
-    -- Avoid duplicates
-    if espObjects[probe] then return end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ProbeESP"
-    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red fill
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-    highlight.Adornee = probe
-    highlight.Parent = game:GetService("CoreGui") -- Hide it in CoreGui
-    highlight.Enabled = ESP_ENABLED
-
-    espObjects[probe] = highlight
-
-    -- Cleanup if probe is destroyed
-    probe.AncestryChanged:Connect(function(_, parent)
-        if not parent then
-            if espObjects[probe] then
-                espObjects[probe]:Destroy()
-                espObjects[probe] = nil
-            end
-        end
-    end)
-end
-
--- Function to toggle all ESPs
-local function toggleESP(state)
-    ESP_ENABLED = state
-    for _, highlight in pairs(espObjects) do
-        if highlight then
-            highlight.Enabled = state
-        end
-    end
-end
-
--- Scan workspace for existing probes (adjust the path if probes are stored elsewhere)
--- Assuming probes have "Probe" in their name or are in a specific folder.
--- Update this logic based on how Twisted structures its workspace.
-local function scanForProbes()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj.Name:lower():match("probe") and (obj:IsA("Model") or obj:IsA("BasePart")) then
-            createESP(obj)
-        end
-    end
-end
-
--- Listen for new probes being added
-workspace.DescendantAdded:Connect(function(obj)
-    if obj.Name:lower():match("probe") and (obj:IsA("Model") or obj:IsA("BasePart")) then
-        createESP(obj)
-    end
-end)
-
--- Initial scan
-scanForProbes()
-
--- Rayfield Toggle
-Tab:CreateToggle({
-    Name = "Enable Probe ESP",
+    TwistedTab:CreateToggle({
+    Name = "Universal Probe ESP (Red)",
     CurrentValue = false,
-    Flag = "ProbeESPToggle",
+    Flag = "UniversalProbeESP",
     Callback = function(Value)
-        toggleESP(Value)
+        universalESP_Enabled = Value
+        updateESPVisibility()
     end,
 })
 
-Rayfield:Notify({
-    Title = "ESP Loaded",
-    Content = "Probe ESP is ready. Toggle it in the Visuals tab.",
-    Duration = 5,
-    Image = 4483362458,
+TwistedTab:CreateToggle({
+    Name = "Personal Probe ESP (Green)",
+    CurrentValue = false,
+    Flag = "PersonalProbeESP",
+    Callback = function(Value)
+        personalESP_Enabled = Value
+        updateESPVisibility()
+    end,
 })
-
+end
 local customPos = nil
 
 local function findSafePlatform()
