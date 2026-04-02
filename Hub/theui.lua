@@ -162,6 +162,35 @@ TwistedTab:CreateToggle({
         updateESPVisibility()
     end,
 })
+
+TwistedTab:CreateSection("Press instant respawn when you died")
+TwistedTab:CreateButton({
+    Name = "Instant Respawn",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local events = ReplicatedStorage:FindFirstChild("events")
+        
+        if events then
+            local respawnRemote = events:FindFirstChild("plr_respawn")
+            if respawnRemote then
+                respawnRemote:FireServer()
+                Rayfield:Notify({
+                    Title = "Respawned",
+                    Content = "Bypassed the timer.",
+                    Duration = 3,
+                    Image = 4483362458,
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Respawn remote not found.",
+                    Duration = 3,
+                    Image = 4483362458,
+                })
+            end
+        end
+    end,
+})
     
 end
 
