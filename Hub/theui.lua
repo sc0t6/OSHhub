@@ -49,6 +49,20 @@ HomeTab:CreateButton({
 })
 
 HomeTab:CreateButton({
+    Name = "Dex++",
+    Callback = function()
+        loadstring(game:HttpGet("https://github.com/AZYsGithub/DexPlusPlus/releases/latest/download/out.lua"))()
+    end
+})
+
+HomeTab:CreateButton({
+    Name = "Cobalt (Remote Spy)",
+    Callback = function()
+        loadstring(game:HttpGet("https://github.com/notpoiu/cobalt/releases/latest/download/Cobalt.luau"))()
+    end
+})
+
+HomeTab:CreateButton({
     Name = "Check Game Detection",
     Callback = function()
         if Supported or NDSSupport then
