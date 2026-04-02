@@ -13,13 +13,6 @@ local Username = LocalPlayer.Name
 local Supported = (GameId == 6161235818 or GameId == 2251388500)
 local NDSSupport = (GameId == 189707)
 local Executor = (type(identifyexecutor) == "function" and identifyexecutor()) or "Unknown Executor"
-local ExecLevel = (type(getexecutorlevel) == "function" and getexecutorlevel()) or "Unknown"
-
-local selectedTornado = nil
-local interceptDistance = 100 
-local tornadoVelocity = Vector3.new(0,0,0)
-local lastTornadoPos = Vector3.new(0,0,0)
-local lastProbePos = nil 
 
 local Window = Rayfield:CreateWindow({
     Name = "OSHhub",
@@ -78,124 +71,93 @@ if Supported then
     local TwistedTab = Window:CreateTab("Twisted", "party-popper")
 
     TwistedTab:CreateSection("Bypasses")
-    TwistedTab:CreateSection("When you die, press the button again so the anticheat doesnt occur")
     TwistedTab:CreateButton({
-        Name = "TwistedB (Bypass, but expires when died)",
+        Name = "TwistedB (Bypass)",
         Callback = function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/sc0t6/OSHhub/refs/heads/main/scripts/bypasstwisted.lua"))()
         end
     })
 
-TwistedTab:CreateSection("Tornado Interceptor")
+local ESP_ENABLED = false
+local espObjects = {}
 
-    local function getTornadoList()
-        local list = {}
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("Model") and (v.Name:lower():find("tornado") or v.Name:lower():find("funnel")) then
-                if not Players:GetPlayerFromCharacter(v) then
-                    table.insert(list, v.Name)
-                end
+-- Function to create ESP for a probe
+local function createESP(probe)
+    if not probe:IsA("Model") and not probe:IsA("BasePart") then return end
+    
+    -- Avoid duplicates
+    if espObjects[probe] then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ProbeESP"
+    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red fill
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = probe
+    highlight.Parent = game:GetService("CoreGui") -- Hide it in CoreGui
+    highlight.Enabled = ESP_ENABLED
+
+    espObjects[probe] = highlight
+
+    -- Cleanup if probe is destroyed
+    probe.AncestryChanged:Connect(function(_, parent)
+        if not parent then
+            if espObjects[probe] then
+                espObjects[probe]:Destroy()
+                espObjects[probe] = nil
             end
-        end
-        
-        if #list == 0 then 
-            return {"No Tornadoes Found"} 
-        end
-        return list
-    end
-
-    local TornadoDropdown = TwistedTab:CreateDropdown({
-        Name = "Select Target Tornado",
-        Options = getTornadoList(),
-        CurrentOption = {""},
-        Flag = "TornadoDropdown", 
-        Callback = function(Option)
-            local selectedName = type(Option) == "table" and Option[1] or Option
-            
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("Model") and v.Name == selectedName then
-                    if not v.PrimaryPart then
-                        v.PrimaryPart = v:FindFirstChildWhichIsA("BasePart")
-                    end
-                    
-                    selectedTornado = v
-                    if v.PrimaryPart then 
-                        lastTornadoPos = v.PrimaryPart.Position 
-                        Rayfield:Notify({Title = "Target Acquired", Content = "Tracking: " .. v.Name, Duration = 3})
-                    else
-                        Rayfield:Notify({Title = "Error", Content = "Tornado has no physical parts to track!", Duration = 3})
-                    end
-                    break
-                end
-            end
-        end,
-    })
-
-    TwistedTab:CreateButton({
-        Name = "Refresh Tornado List",
-        Callback = function()
-            TornadoDropdown:Refresh(getTornadoList(), true)
-        end,
-    })
-
-    TwistedTab:CreateSlider({
-        Name = "Intercept Distance",
-        Range = {50, 500},
-        Increment = 10,
-        Suffix = "Studs",
-        CurrentValue = 100,
-        Flag = "DistSlider", 
-        Callback = function(Value)
-            interceptDistance = Value
-        end,
-    })
-
-    -- TELEPORT TO INTERCEPT
-    TwistedTab:CreateButton({
-        Name = "Teleport to Intercept Path",
-        Callback = function()
-            if selectedTornado and (selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")) then
-                local char = LocalPlayer.Character
-                local root = char and char:FindFirstChild("HumanoidRootPart")
-                local tPrim = selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")
-
-                if root and tPrim then
-                    local direction = tornadoVelocity.Unit
-                    if direction.X ~= direction.X then direction = Vector3.new(1,0,0) end 
-                    
-                    local interceptPos = tPrim.Position + (direction * interceptDistance)
-                    
-                    local rayOrigin = interceptPos + Vector3.new(0, 100, 0)
-                    local rayDirection = Vector3.new(0, -200, 0)
-                    local raycastParams = RaycastParams.new()
-                    raycastParams.FilterDescendantsInstances = {char, selectedTornado}
-                    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-                    
-                    local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-                    local finalY = rayResult and (rayResult.Position.Y + 3) or (tPrim.Position.Y)
-
-                    local finalPos = Vector3.new(interceptPos.X, finalY, interceptPos.Z)
-                    lastProbePos = finalPos 
-                    
-                    root.CFrame = CFrame.new(finalPos, Vector3.new(tPrim.Position.X, finalY, tPrim.Position.Z))
-                    Rayfield:Notify({Title = "Positioned", Content = "Waiting for intercept...", Duration = 3})
-                end
-            else
-                Rayfield:Notify({Title = "Search Error", Content = "No active tornado selected or found.", Duration = 3})
-            end
-        end,
-    })
-
-    RunService.Heartbeat:Connect(function(deltaTime)
-        if selectedTornado and (selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")) then
-            local tPrim = selectedTornado.PrimaryPart or selectedTornado:FindFirstChildWhichIsA("BasePart")
-            local currentPos = tPrim.Position
-            local displacement = currentPos - lastTornadoPos
-            tornadoVelocity = displacement / deltaTime
-            lastTornadoPos = currentPos
         end
     end)
-end    
+end
+
+-- Function to toggle all ESPs
+local function toggleESP(state)
+    ESP_ENABLED = state
+    for _, highlight in pairs(espObjects) do
+        if highlight then
+            highlight.Enabled = state
+        end
+    end
+end
+
+-- Scan workspace for existing probes (adjust the path if probes are stored elsewhere)
+-- Assuming probes have "Probe" in their name or are in a specific folder.
+-- Update this logic based on how Twisted structures its workspace.
+local function scanForProbes()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj.Name:lower():match("probe") and (obj:IsA("Model") or obj:IsA("BasePart")) then
+            createESP(obj)
+        end
+    end
+end
+
+-- Listen for new probes being added
+workspace.DescendantAdded:Connect(function(obj)
+    if obj.Name:lower():match("probe") and (obj:IsA("Model") or obj:IsA("BasePart")) then
+        createESP(obj)
+    end
+end)
+
+-- Initial scan
+scanForProbes()
+
+-- Rayfield Toggle
+Tab:CreateToggle({
+    Name = "Enable Probe ESP",
+    CurrentValue = false,
+    Flag = "ProbeESPToggle",
+    Callback = function(Value)
+        toggleESP(Value)
+    end,
+})
+
+Rayfield:Notify({
+    Title = "ESP Loaded",
+    Content = "Probe ESP is ready. Toggle it in the Visuals tab.",
+    Duration = 5,
+    Image = 4483362458,
+})
 
 local customPos = nil
 
