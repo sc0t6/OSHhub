@@ -96,7 +96,6 @@ HomeTab:CreateSection("PlaceID: " .. PlaceId)
 HomeTab:CreateSection("UserId: " .. UserId)
 HomeTab:CreateSection("Username: " .. Username)
 HomeTab:CreateSection("Executor: " .. Executor)
-HomeTab:CreateSection("Executor Level: " .. tostring(ExecLevel))
 HomeTab:CreateSection("Supported: " .. tostring(Supported))
 
 HomeTab:CreateButton({
